@@ -1,45 +1,305 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <!-- ... (CSS tetap sama seperti asli Anda, dipersingkat di sini) ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Layanan Inspektorat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        /* (CSS yang sama seperti yang Anda kirimkan, tidak diubah) */
+        :root { --merah: #dc2626; --hijau: #16a34a; --hitam: #0f172a; --putih: #ffffff; --abu: #cbd5e1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 45%, #14532d 100%); background-attachment: fixed; min-height: 100vh; color: var(--putih); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 15px; }
+        .portal-header { text-align: center; margin-bottom: 25px; }
+        .logos { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .logo-circle { width: 70px; height: 70px; background: var(--putih); border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid var(--hijau); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .logo-circle img { width: 80%; height: 80%; object-fit: contain; border-radius: 50%; }
+        .portal-title { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-shadow: 2px 4px 10px rgba(0,0,0,0.5); line-height: 1.2; }
+        .portal-subtitle { color: var(--abu); margin-top: 10px; font-size: 0.9rem; letter-spacing: 1px; }
+        .warning-banner { background: rgba(220, 38, 38, 0.15); border: 1px solid var(--merah); border-radius: 12px; padding: 18px; text-align: center; font-size: 0.85rem; font-weight: 500; line-height: 1.6; color: #fecaca; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 10px; justify-content: center; }
+        .warning-banner svg { fill: var(--merah); width: 24px; height: 24px; flex-shrink: 0; }
+        .menu-list { display: flex; flex-direction: column; gap: 12px; }
+        .menu-btn { background: linear-gradient(135deg, #1f3b2c, #2c5540); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; justify-content: center; gap: 15px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; color: var(--putih); cursor: pointer; transition: all 0.3s ease; text-decoration: none; box-shadow: 0 8px 20px rgba(0,0,0,0.3); position: relative; overflow: hidden; }
+        .menu-btn::before { content: ''; position: absolute; top: 0; left: 0; width: 0; height: 100%; background: linear-gradient(135deg, var(--merah), var(--hijau)); transition: width 0.4s ease; z-index: 0; opacity: 0.9; }
+        .menu-btn:hover::before, .menu-btn.active::before { width: 100%; }
+        .menu-btn span, .menu-btn svg { position: relative; z-index: 1; }
+        .menu-btn svg { width: 24px; height: 24px; fill: var(--putih); opacity: 0.9; }
+        .menu-btn:hover, .menu-btn.active { box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4); transform: translateY(-2px); }
+        .menu-btn.website-btn { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 20px rgba(217, 119, 6, 0.4); color: #ffffff; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .menu-btn.website-btn::before { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
+        .menu-btn.back-btn { background: transparent; border: 2px solid rgba(255,255,255,0.8); color: var(--putih); box-shadow: none; margin-bottom: 10px; }
+        .menu-btn.back-btn::before { display: none; }
+        .menu-btn.back-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--hijau); }
+        .menu-btn.disabled { opacity: 0.6; cursor: not-allowed; pointer-events: none; background: #2d3748; border: 1px solid #4a5568; }
+        .menu-btn.disabled::before { display: none; }
+        .badge-soon { background: rgba(255, 255, 255, 0.2); color: var(--putih); font-size: 0.65rem; font-weight: 800; padding: 4px 8px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.3); margin-left: 5px; }
+        #comingSoonModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+        #comingSoonModal.show { display: flex; opacity: 1; }
+        .modal-content { background: #1e293b; border-radius: 20px; padding: 40px; max-width: 400px; width: 90%; text-align: center; border: 2px solid var(--hijau); box-shadow: 0 15px 40px rgba(0,0,0,0.5); position: relative; transform: scale(0.8); transition: transform 0.3s ease; }
+        #comingSoonModal.show .modal-content { transform: scale(1); }
+        .modal-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--merah), var(--hijau)); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .modal-icon svg { width: 40px; height: 40px; fill: white; }
+        .modal-title { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; color: var(--putih); text-transform: uppercase; letter-spacing: 1px; }
+        .modal-text { color: var(--abu); margin-bottom: 25px; font-size: 0.95rem; line-height: 1.6; }
+        .modal-close { background: transparent; border: 2px solid var(--hijau); border-radius: 30px; padding: 12px 30px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem; color: var(--putih); cursor: pointer; transition: 0.3s; }
+        .modal-close:hover { background: var(--hijau); color: var(--hitam); }
+        .profile-box { background: rgba(15, 23, 42, 0.7); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .profile-title { font-family: 'Montserrat', sans-serif; color: var(--hijau); font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; border-bottom: 2px solid var(--hijau); padding-bottom: 10px; }
+        .profile-img-container { margin-bottom: 25px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); background: #1e293b; display: flex; justify-content: center; align-items: center; height: 200px; }
+        .profile-img-container svg { width: 80px; height: 80px; fill: var(--hijau); }
+        .profile-text { color: var(--abu); line-height: 1.8; font-size: 0.95rem; margin-bottom: 20px; }
+        .profile-text strong { color: var(--putih); }
+        .profile-subtitle { color: var(--hijau); font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 700; margin-top: 30px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .profile-subtitle svg { width: 20px; height: 20px; fill: var(--hijau); }
+        .profile-list { list-style: none; margin-bottom: 20px; padding-left: 5px; }
+        .profile-list li { margin-bottom: 12px; position: relative; padding-left: 25px; color: var(--abu); font-size: 0.95rem; line-height: 1.7; }
+        .profile-list li::before { content: ''; position: absolute; left: 0; top: 8px; width: 10px; height: 10px; background: linear-gradient(135deg, var(--merah), var(--hijau)); border-radius: 50%; }
+        .profile-contact { color: var(--abu); font-size: 0.95rem; line-height: 1.8; }
+        .profile-contact p { margin-bottom: 10px; }
+        .profile-contact strong { color: var(--putih); }
+        .pejabat-header-text { color: var(--abu); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6; }
+        .pejabat-list { display: flex; flex-direction: column; gap: 15px; }
+        .pejabat-card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 15px; display: flex; align-items: center; gap: 20px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .pejabat-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, var(--merah), var(--hijau)); }
+        .pejabat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: var(--hijau); }
+        .pejabat-photo-container { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; border: 3px solid var(--hijau); background: #0f172a; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
+        .pejabat-photo-container svg { width: 40px; height: 40px; fill: var(--abu); }
+        .pejabat-details { flex-grow: 1; }
+        .pejabat-number { background: linear-gradient(135deg, var(--merah), var(--hijau)); display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; }
+        .pejabat-name { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--putih); margin-bottom: 5px; }
+        .pejabat-role { color: var(--hijau); font-size: 0.9rem; font-weight: 600; }
+        .spip-container { background: rgba(15, 23, 42, 0.7); border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .spip-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .spip-title { font-family: 'Montserrat', sans-serif; color: var(--hijau); font-size: 1.5rem; font-weight: 800; }
+        .btn-tab { background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .btn-tab.active { background: var(--hijau); }
+        .spip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; }
+        .spip-card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 20px; transition: 0.3s; position: relative; }
+        .spip-card:hover { border-color: var(--hijau); transform: translateY(-2px); }
+        .spip-label { color: var(--abu); font-size: 0.9rem; margin-bottom: 8px; }
+        .spip-value { font-family: 'Montserrat', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--putih); line-height: 1; margin-bottom: 10px; }
+        .spip-value span { font-size: 1rem; font-weight: 600; color: var(--abu); }
+        .spip-desc { color: var(--abu); font-size: 0.8rem; margin-bottom: 12px; }
+        .spip-bar-bg { width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
+        .spip-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--merah), var(--hijau)); }
+        .spip-icon { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; background: rgba(22, 163, 74, 0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; }
+        .spip-icon svg { width: 24px; height: 24px; fill: var(--hijau); }
+        .portal-footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: var(--abu); }
+        .form-container { background: rgba(15, 23, 42, 0.7); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .form-title { font-family: 'Montserrat', sans-serif; color: var(--hijau); font-size: 1.8rem; font-weight: 800; margin-bottom: 25px; border-bottom: 2px solid var(--hijau); padding-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--putih); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 14px 16px; background: #1e293b; border: 2px solid #334155; border-radius: 10px; color: var(--putih); font-family: 'Inter', sans-serif; font-size: 1rem; transition: 0.3s; outline: none; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--hijau); background: #0f172a; }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .btn-submit { background: linear-gradient(135deg, var(--hijau), var(--merah)); border: none; width: 100%; padding: 16px; border-radius: 12px; color: var(--putih); font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+        #loadingOverlay { display: none; text-align: center; margin-top: 20px; background: rgba(15, 23, 42, 0.9); padding: 20px; border-radius: 10px; border: 1px solid var(--hijau); }
+        .loading-bar-container { width: 100%; background: #334155; height: 12px; border-radius: 6px; margin-top: 15px; overflow: hidden; }
+        #loadingBar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--merah), var(--hijau)); transition: width 0.3s ease; }
+        #loadingText { color: var(--putih); margin-top: 10px; font-size: 0.9rem; font-weight: 600; }
+        .success-msg { background: rgba(22, 163, 74, 0.2); border: 1px solid var(--hijau); padding: 20px; border-radius: 10px; margin-top: 20px; text-align: center; color: var(--hijau); font-weight: 700; display: none; animation: fadeIn 0.5s ease; }
+        .view-section { display: none !important; }
+        .view-section.active { display: flex !important; flex-direction: column; gap: 20px; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 500px) { .portal-title { font-size: 1.4rem; } .menu-btn { padding: 15px 15px; font-size: 0.95rem; } .logo-circle { width: 60px; height: 60px; } .warning-banner { font-size: 0.8rem; padding: 15px; } .form-container, .profile-box { padding: 20px; } .pejabat-photo-container { width: 60px; height: 60px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Menu Utama & Menu Lainnya (Sama seperti asli) -->
-        <!-- Tambahkan tab untuk 2 Dashboard -->
+        <!-- MENU UTAMA -->
+        <div id="main-menu" class="view-section active">
+            <div class="portal-header">
+                <div class="logos">
+                    <div class="logo-circle"><img src="https://lh3.googleusercontent.com/d/1RYP8dnemjqLESJyYAZyy2LY49eEV_qPs=w200" alt="Logo 1"></div>
+                    <div class="logo-circle"><img src="https://lh3.googleusercontent.com/d/117A6FRjOBLiZGaQLTIUcGAaqK03b9ZQw=w200" alt="Logo 2"></div>
+                </div>
+                <h1 class="portal-title">INSPEKTORAT<br>KABUPATEN MAHAKAM ULU</h1>
+                <p class="portal-subtitle">Pelayanan Prima · Profesional · Berintegritas</p>
+            </div>
+            <div class="warning-banner">
+                <svg viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>
+                <span>KAMI TIDAK ADA MEMUNGUT BIAYA APAPUN. HATI-HATI JIKA ADA YANG MENGATASNAMAKAN INSPEKTORAT MAHAKAM ULU DENGAN MEMUNGUT BIAYA, ITU PALSU. SEGERA LAPORKAN!</span>
+            </div>
+            <div class="menu-list">
+                <div class="menu-btn website-btn" onclick="openWebsiteInspektorat()">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    <span>Website Inspektorat</span>
+                </div>
+                <div class="menu-btn active" onclick="showServices()">
+                    <svg viewBox="0 0 24 24"><path d="M13 3v18h8V3h-8zM3 9h6v12H3V9zm10-6h8v2h-8V3zM3 7h6v2H3V7zm10 2h8v2h-8V9zM3 11h6v2H3v-2zm10 2h8v2h-8v-2zM3 15h6v2H3v-2zm10 2h8v2h-8v-2zM3 19h6v2H3v-2z"/></svg>
+                    <span>Aplikasi Layanan</span>
+                </div>
+                <div class="menu-btn" onclick="showProfil()">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                    <span>Profil Inspektorat</span>
+                </div>
+                <div class="menu-btn" onclick="showPejabat()">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4h2v4zm0-6h-2V7h2v4z"/></svg>
+                    <span>Pejabat Pengelola Keuangan</span>
+                </div>
+                <div class="menu-btn" onclick="showComingSoon('Peraturan & Pedoman Pembinaan')">
+                    <svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm-2 14.4l-3-1.64v-3.28l3 1.64v3.28zm2-5.09l-7-3.82 7-3.82 7 3.82-7 3.82z"/></svg>
+                    <span>Peraturan & Pedoman Pembinaan</span>
+                </div>
+                <div class="menu-btn" onclick="showPengaduan()">
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                    <span>Layanan Pengaduan Masyarakat</span>
+                </div>
+                <div class="menu-btn" onclick="showComingSoon('Jadwal & Agenda')">
+                    <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+                    <span>Jadwal & Agenda</span>
+                </div>
+                <div class="menu-btn" onclick="showComingSoon('Kontak Kami')">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    <span>Kontak Kami</span>
+                </div>
+                <div class="menu-btn disabled">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                    <span>Layanan Lainnya</span>
+                    <span class="badge-soon">Segera Hadir</span>
+                </div>
+            </div>
+        </div>
+        <!-- PILIH LAYANAN -->
+        <div id="services-menu" class="view-section">
+            <div class="portal-header" style="margin-bottom: 10px;"><h1 class="portal-title">PILIH LAYANAN</h1></div>
+            <div class="menu-list">
+                <div class="menu-btn" onclick="showSpip()"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg><span>Pemantauan SPIP</span></div>
+                <div class="menu-btn" onclick="showComingSoon('Layanan Konsultasi')"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>Layanan Konsultasi</span></div>
+                <div class="menu-btn" onclick="showComingSoon('Penerbitan Rekomendasi')"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg><span>Penerbitan Rekomendasi</span></div>
+                <div class="menu-btn" onclick="showComingSoon('Surat Keterangan Bebas Temuan')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4h2v4zm0-6h-2V7h2v4z"/></svg><span>Surat Keterangan Bebas Temuan</span></div>
+                <div class="menu-btn" onclick="showComingSoon('Monev Kinerja')"><svg viewBox="0 0 24 24"><path d="M3 5v4h2V5H3zm4-2h12c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2zm0 4v12h12V9H7zm2 8h2v-2H9v2zm0-4h2v-2H9v2zm0-4h2V9H9v2zm4 8h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V9h-2v2z"/></svg><span>Monev Kinerja</span></div>
+                <div class="menu-btn back-btn" onclick="showMain()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Kembali ke Portal Utama</span></div>
+            </div>
+        </div>
+        <!-- PROFIL INSPEKTORAT -->
+        <div id="profil-menu" class="view-section">
+            <div class="menu-btn back-btn" onclick="showMain()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Kembali ke Portal Utama</span></div>
+            <div class="profile-box">
+                <h2 class="profile-title">PROFIL INSPEKTORAT</h2>
+                <div class="profile-img-container">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                </div>
+                <p class="profile-text">Inspektorat Daerah Kabupaten Mahakam Ulu adalah unsur pengawas penyelenggaraan pemerintahan daerah di Mahakam Ulu, Kalimantan Timur. Lembaga ini dipimpin oleh seorang Pelaksana Tugas (Plt.) Inspektur, <strong>Margono, S.T., M.Si.</strong>, yang bertanggung jawab langsung kepada Bupati.</p>
+                <h3 class="profile-subtitle"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Tugas dan Fungsi Utama</h3>
+                <ul class="profile-list">
+                    <li>Menjalankan pengawasan internal terhadap pelaksanaan urusan pemerintahan di lingkungan Pemkab Mahakam Ulu melalui APIP.</li>
+                    <li>Berfungsi sebagai <em>early warning system</em> guna mengawal regulasi dan kebijakan daerah agar berjalan sesuai aturan.</li>
+                    <li>Meningkatkan kualitas tata kelola pemerintahan melalui evaluasi maturitas Sistem Pengendalian Intern Pemerintah (SPIP) Terintegrasi dan Manajemen Risiko.</li>
+                </ul>
+                <h3 class="profile-subtitle"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Informasi Operasional dan Kontak</h3>
+                <div class="profile-contact">
+                    <p><strong>Lokasi Kantor:</strong> Ujoh Bilang, Kecamatan Long Bagun, Kabupaten Mahakam Ulu, Kalimantan Timur.</p>
+                    <p><strong>Jam Layanan:</strong></p>
+                    <p>Senin – Kamis: 08.00 – 16.00 WITA</p>
+                    <p>Jumat: 08.00 – 11.00 WITA</p>
+                    <p><strong>Informasi Resmi:</strong> Pembaruan program kerja dan kegiatan pengawasan dapat diakses melalui portal PPID Kabupaten Mahakam Ulu atau akun media sosial Inspektorat Kabupaten Mahakam Ulu.</p>
+                </div>
+            </div>
+        </div>
+        <!-- PEJABAT PENGELOLA KEUANGAN -->
+        <div id="pejabat-menu" class="view-section">
+            <div class="menu-btn back-btn" onclick="showMain()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Kembali ke Portal Utama</span></div>
+            <div class="profile-box">
+                <h2 class="profile-title">PEJABAT PENGELOLA KEUANGAN</h2>
+                <p class="pejabat-header-text">Berikut adalah daftar Pejabat Pengelola Keuangan di lingkungan Inspektorat Kabupaten Mahakam Ulu:</p>
+                <div class="pejabat-list">
+                    <div class="pejabat-card">
+                        <div class="pejabat-photo-container"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                        <div class="pejabat-details">
+                            <span class="pejabat-number">No. 1</span>
+                            <h3 class="pejabat-name">[Nama Pejabat 1]</h3>
+                            <p class="pejabat-role">Bendahara Pengeluaran</p>
+                        </div>
+                    </div>
+                    <div class="pejabat-card">
+                        <div class="pejabat-photo-container"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                        <div class="pejabat-details">
+                            <span class="pejabat-number">No. 2</span>
+                            <h3 class="pejabat-name">[Nama Pejabat 2]</h3>
+                            <p class="pejabat-role">Bendahara Pembantu</p>
+                        </div>
+                    </div>
+                    <div class="pejabat-card">
+                        <div class="pejabat-photo-container"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                        <div class="pejabat-details">
+                            <span class="pejabat-number">No. 3</span>
+                            <h3 class="pejabat-name">[Nama Pejabat 3]</h3>
+                            <p class="pejabat-role">PPK / Pejabat Pembuat Komitmen</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- PEMANTAUAN SPIP & MONIV -->
         <div id="spip-menu" class="view-section">
-            <div class="menu-btn back-btn" onclick="showServices()">...</div>
+            <div class="menu-btn back-btn" onclick="showServices()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Kembali ke Pilihan</span></div>
             <div class="spip-container">
                 <div class="spip-header">
-                    <h2 class="spip-title">Pemantauan SPIP & Monev</h2>
-                    <!-- Tab Dashboard 1 & 2 -->
+                    <h2 class="spip-title">Pemantauan SPIP</h2>
                     <div style="display: flex; gap: 10px;">
                         <button onclick="switchDashboard('spip')" class="btn-tab active">SPIP</button>
                         <button onclick="switchDashboard('monev')" class="btn-tab">Monev</button>
                     </div>
                 </div>
-                <div id="spip-cards" class="spip-grid">Memuat...</div>
+                <div id="spip-cards" class="spip-grid"><div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--abu);">Memuat data SPIP...</div></div>
             </div>
         </div>
-
-        <!-- Form Pengaduan -->
+        <!-- PENGADUAN -->
         <div id="pengaduan-menu" class="view-section">
-            <!-- Tambahkan Honeypot hidden field untuk anti-bot -->
-            <input type="text" name="website" id="website" style="display:none">
-            <!-- Formnya sama, tapi id "btnSubmit" akan dipanggil lewat fetch -->
+            <div class="menu-btn back-btn" onclick="showMain()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg><span>Kembali ke Portal Utama</span></div>
+            <div class="form-container">
+                <h2 class="form-title">Formulir Pengaduan Online</h2>
+                <form id="pengaduanForm" onsubmit="submitPengaduan(event)">
+                    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama" required placeholder="Nama Anda"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="email" required placeholder="email@contoh.com"></div>
+                    <div class="form-group"><label>No. Telepon / WhatsApp</label><input type="tel" id="telepon" placeholder="08xxxxxxxxxx"></div>
+                    <div class="form-group"><label>Kategori Pengaduan</label><select id="kategori" required><option value="">-- Pilih Kategori --</option><option value="Korupsi">Dugaan Korupsi</option><option value="Pelanggaran Hukum">Pelanggaran Hukum</option><option value="Pelanggaran Kepegawaian">Pelanggaran Kepegawaian</option><option value="Lainnya">Lainnya</option></select></div>
+                    <div class="form-group"><label>Isi Pengaduan</label><textarea id="pesan" rows="5" required placeholder="Tuliskan kronologi kejadian secara detail..."></textarea></div>
+                    
+                    <!-- Honeypot Anti Bot (Harus Kosong) -->
+                    <input type="text" name="website" id="website" style="display:none" tabindex="-1" autocomplete="off">
+                    
+                    <button type="submit" class="btn-submit" id="btnSubmit">Kirim Pengaduan</button>
+                </form>
+                <div id="loadingOverlay"><p id="loadingText">Mengirim... 0%</p><div class="loading-bar-container"><div id="loadingBar"></div></div></div>
+                <div class="success-msg" id="successMessage">✅ Terima kasih! Pengaduan Anda telah berhasil dikirim.</div>
+            </div>
         </div>
     </div>
-
-    <!-- ... Modal & Footer Sama ... -->
+    <div id="comingSoonModal" onclick="closeComingSoon(event)">
+        <div class="modal-content">
+            <div class="modal-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+            <h3 class="modal-title" id="modalTitle">Layanan Akan Segera Hadir</h3>
+            <p class="modal-text" id="modalText">Mohon maaf, halaman ini sedang dalam pengembangan. Kami akan segera memberikannya untuk Anda.</p>
+            <button class="modal-close" onclick="closeComingSoon()">Kembali</button>
+        </div>
+    </div>
+    <div class="portal-footer">© 2026 Inspektorat Kabupaten Mahakam Ulu</div>
 
     <script>
-        // 1. Ganti URL ini dengan URL Worker Anda
-        const API_BASE_URL = "https://nama-worker.username.workers.dev";
+        // GANTI URL INI DENGAN URL WORKER ANDA
+        const API_BASE_URL = "https://nama-worker-anda.username.workers.dev"; 
 
-        // 2. Fungsi Ganti Dashboard (Fitur 2 Dashboard)
+        var WEBSITE_INSPEKTORAT_URL = "https://inspektorat.mahakamulukab.go.id/"; 
+        function openWebsiteInspektorat() { window.open(WEBSITE_INSPEKTORAT_URL, '_blank'); }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.view-section').forEach(function(el) { el.classList.remove('active'); });
+            var target = document.getElementById(sectionId);
+            if (target) { target.classList.add('active'); }
+            window.scrollTo(0, 0);
+        }
+
+        function showMain() { showSection('main-menu'); }
+        function showServices() { showSection('services-menu'); }
+        function showPengaduan() { showSection('pengaduan-menu'); }
+        function showProfil() { showSection('profil-menu'); }
+        function showPejabat() { showSection('pejabat-menu'); }
+        
+        // FUNGSI DASHBOARD GANDA
         let currentDashboard = 'spip';
         function switchDashboard(type) {
             currentDashboard = type;
@@ -48,7 +308,6 @@
             loadDashboard();
         }
 
-        // 3. Logic Fetch Data Dashboard
         function showSpip() { 
             showSection('spip-menu'); 
             loadDashboard();
@@ -64,18 +323,46 @@
                 let rawData = (currentDashboard === 'spip') ? data.spip : data.monev;
                 renderCards(rawData, container);
             } catch (error) {
-                container.innerHTML = `<div style="color: red;">Gagal memuat: ${error.message}</div>`;
+                container.innerHTML = `<div style="color: red;">Gagal memuat data: ${error.message}</div>`;
             }
         }
 
         function renderCards(data, container) {
             let html = '';
-            // Logic render sama seperti asli Anda (Menggunakan sanitasi)
-            // ... (Kode render bar disini) ...
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = 'Data kosong atau tidak valid.';
+                return;
+            }
+            data.forEach(function(row, index) {
+                let label = row[0] || "";
+                let value = row[1] || 0;
+                let desc = row[2] || "";
+                let percent = row[3] || 0;
+                let width = Math.min(100, Math.max(0, percent));
+
+                html += `<div class="spip-card">
+                            <div class="spip-label">${label}</div>
+                            <div class="spip-value">${value}<span></span></div>
+                            <div class="spip-desc">${desc}</div>
+                            <div class="spip-bar-bg">
+                                <div class="spip-bar-fill" style="width: ${width}%;"></div>
+                            </div>
+                         </div>`;
+            });
             container.innerHTML = html;
         }
 
-        // 4. Logic Pengaduan (Ganti google.script.run dengan fetch)
+        function showComingSoon(namaLayanan) {
+            document.getElementById('modalTitle').innerText = namaLayanan + " - Akan Segera Hadir";
+            document.getElementById('modalText').innerText = "Mohon maaf, halaman " + namaLayanan + " sedang dalam pengembangan. Kami akan segera memberikannya untuk Anda.";
+            document.getElementById('comingSoonModal').classList.add('show');
+        }
+
+        function closeComingSoon(event) {
+            if (event && event.target !== event.currentTarget) return; 
+            document.getElementById('comingSoonModal').classList.remove('show');
+        }
+
         let isSubmitting = false;
         async function submitPengaduan(event) {
             event.preventDefault();
@@ -88,10 +375,19 @@
                 telepon: document.getElementById('telepon').value,
                 kategori: document.getElementById('kategori').value,
                 pesan: document.getElementById('pesan').value,
-                website: document.getElementById('website').value, // Honeypot
+                website: document.getElementById('website').value // Honeypot
             };
 
-            // ... UI Loading Bar code (Sama) ...
+            const overlay = document.getElementById('loadingOverlay');
+            const bar = document.getElementById('loadingBar');
+            const text = document.getElementById('loadingText');
+            const btn = document.getElementById('btnSubmit');
+            const success = document.getElementById('successMessage');
+
+            overlay.style.display = 'block'; bar.style.width = '0%'; text.innerText = 'Mengirim... 0%'; btn.disabled = true; btn.style.opacity = '0.6'; success.style.display = 'none';
+
+            let progress = 0;
+            const interval = setInterval(() => { progress += 10; if (progress > 90) progress = 90; bar.style.width = progress + '%'; text.innerText = 'Mengirim... ' + progress + '%'; }, 150);
 
             try {
                 const res = await fetch(`${API_BASE_URL}/api/pengaduan`, {
@@ -100,15 +396,17 @@
                     body: JSON.stringify(data)
                 });
                 const result = await res.json();
+
+                clearInterval(interval);
                 if (result.success) {
-                    // Tampilkan Sukses
+                    bar.style.width = '100%'; text.innerText = 'Mengirim... 100%';
+                    setTimeout(() => { overlay.style.display = 'none'; btn.disabled = false; btn.style.opacity = '1'; event.target.reset(); success.style.display = 'block'; setTimeout(() => success.style.display = 'none', 8000); }, 500);
                 } else {
-                    alert('Gagal: ' + result.error);
+                    clearInterval(interval); overlay.style.display = 'none'; btn.disabled = false; btn.style.opacity = '1'; alert('Gagal mengirim pengaduan: ' + result.error);
                 }
             } catch (err) {
-                alert('Koneksi Error: ' + err.message);
+                clearInterval(interval); overlay.style.display = 'none'; btn.disabled = false; btn.style.opacity = '1'; alert('Terjadi kesalahan koneksi: ' + err.message);
             } finally {
-                // Reset Loading Bar
                 isSubmitting = false;
             }
         }
