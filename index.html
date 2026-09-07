@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <!-- ... (CSS tetap sama seperti asli Anda, dipersingkat di sini) ... -->
+    <style>
+        /* (CSS yang sama seperti yang Anda kirimkan, tidak diubah) */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Menu Utama & Menu Lainnya (Sama seperti asli) -->
+        <!-- Tambahkan tab untuk 2 Dashboard -->
+        <div id="spip-menu" class="view-section">
+            <div class="menu-btn back-btn" onclick="showServices()">...</div>
+            <div class="spip-container">
+                <div class="spip-header">
+                    <h2 class="spip-title">Pemantauan SPIP & Monev</h2>
+                    <!-- Tab Dashboard 1 & 2 -->
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="switchDashboard('spip')" class="btn-tab active">SPIP</button>
+                        <button onclick="switchDashboard('monev')" class="btn-tab">Monev</button>
+                    </div>
+                </div>
+                <div id="spip-cards" class="spip-grid">Memuat...</div>
+            </div>
+        </div>
+
+        <!-- Form Pengaduan -->
+        <div id="pengaduan-menu" class="view-section">
+            <!-- Tambahkan Honeypot hidden field untuk anti-bot -->
+            <input type="text" name="website" id="website" style="display:none">
+            <!-- Formnya sama, tapi id "btnSubmit" akan dipanggil lewat fetch -->
+        </div>
+    </div>
+
+    <!-- ... Modal & Footer Sama ... -->
+
+    <script>
+        // 1. Ganti URL ini dengan URL Worker Anda
+        const API_BASE_URL = "https://nama-worker.username.workers.dev";
+
+        // 2. Fungsi Ganti Dashboard (Fitur 2 Dashboard)
+        let currentDashboard = 'spip';
+        function switchDashboard(type) {
+            currentDashboard = type;
+            document.querySelectorAll('.btn-tab').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadDashboard();
+        }
+
+        // 3. Logic Fetch Data Dashboard
+        function showSpip() { 
+            showSection('spip-menu'); 
+            loadDashboard();
+        }
+
+        async function loadDashboard() {
+            const container = document.getElementById('spip-cards');
+            container.innerHTML = 'Memuat data...';
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/dashboard-data`);
+                const data = await res.json();
+
+                let rawData = (currentDashboard === 'spip') ? data.spip : data.monev;
+                renderCards(rawData, container);
+            } catch (error) {
+                container.innerHTML = `<div style="color: red;">Gagal memuat: ${error.message}</div>`;
+            }
+        }
+
+        function renderCards(data, container) {
+            let html = '';
+            // Logic render sama seperti asli Anda (Menggunakan sanitasi)
+            // ... (Kode render bar disini) ...
+            container.innerHTML = html;
+        }
+
+        // 4. Logic Pengaduan (Ganti google.script.run dengan fetch)
+        let isSubmitting = false;
+        async function submitPengaduan(event) {
+            event.preventDefault();
+            if (isSubmitting) return;
+            isSubmitting = true;
+
+            const data = {
+                nama: document.getElementById('nama').value,
+                email: document.getElementById('email').value,
+                telepon: document.getElementById('telepon').value,
+                kategori: document.getElementById('kategori').value,
+                pesan: document.getElementById('pesan').value,
+                website: document.getElementById('website').value, // Honeypot
+            };
+
+            // ... UI Loading Bar code (Sama) ...
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/pengaduan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    // Tampilkan Sukses
+                } else {
+                    alert('Gagal: ' + result.error);
+                }
+            } catch (err) {
+                alert('Koneksi Error: ' + err.message);
+            } finally {
+                // Reset Loading Bar
+                isSubmitting = false;
+            }
+        }
+    </script>
+</body>
+</html>
